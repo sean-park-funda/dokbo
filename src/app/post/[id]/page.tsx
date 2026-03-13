@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getPost } from "@/lib/actions/post-actions";
 import { getChallenges } from "@/lib/actions/challenge-actions";
 import { PostDetail } from "@/components/post/post-detail";
@@ -7,6 +8,35 @@ import { ChallengeForm } from "@/components/challenge/challenge-form";
 
 interface PostPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PostPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const { data: post } = await getPost(id);
+
+  if (!post) {
+    return { title: "독보적" };
+  }
+
+  const title = `${post.restaurant_name} · ${post.menu_item} - 독보적`;
+  const description = post.claim.slice(0, 150);
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: post.image_url ? [{ url: post.image_url }] : [],
+    },
+    twitter: {
+      card: post.image_url ? "summary_large_image" : "summary",
+      title,
+      description,
+    },
+  };
 }
 
 export default async function PostPage({ params }: PostPageProps) {

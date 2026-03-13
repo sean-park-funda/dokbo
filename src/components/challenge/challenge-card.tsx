@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { relativeTime } from "@/lib/utils";
 import { toggleChallengeVote } from "@/lib/actions/vote-actions";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 interface ChallengeCardProps {
   challenge: {
@@ -29,10 +30,16 @@ export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
   const [isPending, startTransition] = useTransition();
   const [localVoteCount, setLocalVoteCount] = useState(challenge.vote_count);
   const [voted, setVoted] = useState(false);
+  const { user, openLoginModal } = useAuthStore();
 
   const isAcknowledge = challenge.type === "인정";
 
   const handleVote = () => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+
     startTransition(async () => {
       const result = await toggleChallengeVote(
         challenge.id,

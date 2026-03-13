@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { createChallenge } from "@/lib/actions/challenge-actions";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 interface ChallengeFormProps {
   postId: string;
@@ -24,8 +25,22 @@ export function ChallengeForm({ postId }: ChallengeFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [type, setType] = useState<"인정" | "도전">("인정");
   const [open, setOpen] = useState(false);
+  const { user, openLoginModal } = useAuthStore();
+
+  const handleOpen = (newOpen: boolean) => {
+    if (newOpen && !user) {
+      openLoginModal();
+      return;
+    }
+    setOpen(newOpen);
+  };
 
   const handleSubmit = (formData: FormData) => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+
     setError(null);
     formData.set("type", type);
 
@@ -41,7 +56,7 @@ export function ChallengeForm({ postId }: ChallengeFormProps) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={handleOpen}>
       <SheetTrigger
         render={
           <Button className="w-full rounded-xl bg-[#E54D2E] hover:bg-[#D4432A] text-white font-bold py-3 text-base shadow-lg shadow-red-200" />

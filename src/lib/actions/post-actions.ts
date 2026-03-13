@@ -29,10 +29,13 @@ export async function createPost(formData: FormData) {
     return { error: firstError.message };
   }
 
+  const image_url = formData.get("image_url") as string | null;
+
   const { data, error } = await supabase
     .from("posts")
     .insert({
       ...result.data,
+      image_url: image_url || null,
       author_id: user.id,
     })
     .select()
@@ -44,6 +47,89 @@ export async function createPost(formData: FormData) {
 
   revalidatePath("/");
   return { data };
+}
+
+export async function updatePost(id: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "로그인이 필요합니다" };
+  }
+
+  // Verify ownership
+  const { data: existing } = await supabase
+    .from("posts")
+    .select("author_id")
+    .eq("id", id)
+    .single();
+
+  if (!existing || existing.author_id !== user.id) {
+    return { error: "수정 권한이 없습니다" };
+  }
+
+  const rawData = {
+    restaurant_name: formData.get("restaurant_name") as string,
+    menu_item: formData.get("menu_item") as string,
+    location: formData.get("location") as string,
+    category: formData.get("category") as string,
+    claim: formData.get("claim") as string,
+  };
+
+  const result = postSchema.safeParse(rawData);
+  if (!result.success) {
+    const firstError = result.error.issues[0];
+    return { error: firstError.message };
+  }
+
+  const image_url = formData.get("image_url") as string | null;
+
+  const { data, error } = await supabase
+    .from("posts")
+    .update({
+      ...result.data,
+      image_url: image_url || null,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/post/${id}`);
+  return { data };
+}
+
+export async function deletePost(id: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "로그인이 필요합니다" };
+  }
+
+  // Soft delete by setting status to archived
+  const { error } = await supabase
+    .from("posts")
+    .update({ status: "archived" })
+    .eq("id", id)
+    .eq("author_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/");
+  return { success: true };
 }
 
 export async function getPosts(category?: string) {

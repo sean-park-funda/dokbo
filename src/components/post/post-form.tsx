@@ -1,27 +1,63 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { CATEGORIES } from "@/lib/constants";
-import { createPost } from "@/lib/actions/post-actions";
+import { createPost, updatePost } from "@/lib/actions/post-actions";
+import { ImageUpload } from "@/components/shared/image-upload";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
-export function PostForm() {
+interface PostFormProps {
+  initialData?: {
+    id: string;
+    restaurant_name: string;
+    menu_item: string;
+    location: string;
+    category: string;
+    claim: string;
+    image_url: string | null;
+  };
+}
+
+export function PostForm({ initialData }: PostFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [claim, setClaim] = useState("");
-  const [category, setCategory] = useState("한식");
+  const [claim, setClaim] = useState(initialData?.claim || "");
+  const [category, setCategory] = useState(initialData?.category || "한식");
+  const [imageUrl, setImageUrl] = useState<string | null>(
+    initialData?.image_url || null
+  );
+  const { user, openLoginModal } = useAuthStore();
+  const isEdit = !!initialData;
+
+  useEffect(() => {
+    if (!user) {
+      openLoginModal();
+    }
+  }, [user, openLoginModal]);
 
   const handleSubmit = (formData: FormData) => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+
     setError(null);
     formData.set("category", category);
+    if (imageUrl) {
+      formData.set("image_url", imageUrl);
+    }
 
     startTransition(async () => {
-      const result = await createPost(formData);
+      const result = isEdit
+        ? await updatePost(initialData!.id, formData)
+        : await createPost(formData);
+
       if (result.error) {
         setError(result.error);
       } else if (result.data) {
@@ -41,6 +77,7 @@ export function PostForm() {
             <Input
               name="restaurant_name"
               placeholder="예: 을지로 노가리 골목 OO집"
+              defaultValue={initialData?.restaurant_name}
               className="rounded-xl border-orange-200 focus:border-[#E54D2E] focus:ring-[#E54D2E]/20 bg-orange-50/30"
               required
             />
@@ -54,6 +91,7 @@ export function PostForm() {
               <Input
                 name="menu_item"
                 placeholder="예: 노가리 + 맥주"
+                defaultValue={initialData?.menu_item}
                 className="rounded-xl border-orange-200 focus:border-[#E54D2E] focus:ring-[#E54D2E]/20 bg-orange-50/30"
                 required
               />
@@ -65,6 +103,7 @@ export function PostForm() {
               <Input
                 name="location"
                 placeholder="예: 을지로3가역"
+                defaultValue={initialData?.location}
                 className="rounded-xl border-orange-200 focus:border-[#E54D2E] focus:ring-[#E54D2E]/20 bg-orange-50/30"
                 required
               />
@@ -91,6 +130,13 @@ export function PostForm() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-[#1A1A1A] mb-1.5 block">
+              📷 사진
+            </label>
+            <ImageUpload value={imageUrl} onChange={setImageUrl} />
           </div>
 
           <div>
@@ -122,7 +168,13 @@ export function PostForm() {
             disabled={isPending}
             className="w-full rounded-xl bg-[#E54D2E] hover:bg-[#D4432A] text-white font-bold py-3 text-base shadow-lg shadow-red-200 disabled:opacity-50"
           >
-            {isPending ? "등록 중..." : "🔥 독보적 등록하기"}
+            {isPending
+              ? isEdit
+                ? "수정 중..."
+                : "등록 중..."
+              : isEdit
+              ? "수정 완료"
+              : "🔥 독보적 등록하기"}
           </Button>
         </form>
       </CardContent>

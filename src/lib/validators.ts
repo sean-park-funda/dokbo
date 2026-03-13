@@ -48,5 +48,19 @@ export const challengeSchema = z
     }
   );
 
+export const profileSchema = z.object({
+  nickname: z
+    .string()
+    .min(1, "닉네임을 입력해주세요")
+    .max(20, "닉네임은 20자 이내로 입력해주세요"),
+  avatar_emoji: z.string().min(1, "아바타를 선택해주세요"),
+  bio: z
+    .string()
+    .max(100, "자기소개는 100자 이내로 입력해주세요")
+    .optional()
+    .default(""),
+});
+
 export type PostFormData = z.infer<typeof postSchema>;
 export type ChallengeFormData = z.infer<typeof challengeSchema>;
+export type ProfileFormData = z.infer<typeof profileSchema>;

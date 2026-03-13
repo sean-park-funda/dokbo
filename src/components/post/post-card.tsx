@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { HotBadge } from "@/components/shared/hot-badge";
+import { BookmarkButton } from "@/components/shared/bookmark-button";
 import { relativeTime, truncate } from "@/lib/utils";
 import { CATEGORY_COLORS, HOT_THRESHOLD } from "@/lib/constants";
 
@@ -16,6 +18,7 @@ interface PostCardProps {
     location: string;
     claim: string;
     category: string;
+    image_url?: string | null;
     acknowledge_count: number;
     challenge_count: number;
     created_at: string;
@@ -39,8 +42,18 @@ export function PostCard({ post, index }: PostCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
-      <Link href={`/post/${post.id}`}>
-        <Card className="border-orange-100/60 hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden">
+      <Card className="border-orange-100/60 hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden">
+        <Link href={`/post/${post.id}`}>
+          {post.image_url && (
+            <div className="relative w-full h-40">
+              <Image
+                src={post.image_url}
+                alt={post.restaurant_name}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
           <CardContent className="p-4">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="flex items-center gap-2 min-w-0">
@@ -84,19 +97,24 @@ export function PostCard({ post, index }: PostCardProps) {
               &ldquo;{truncate(post.claim, 100)}&rdquo;
             </p>
 
-            <div className="flex items-center gap-3 pt-2 border-t border-orange-50">
-              <button className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
-                <span>👍</span>
-                <span>인정 {post.acknowledge_count}</span>
-              </button>
-              <button className="flex items-center gap-1.5 text-sm text-orange-600 font-medium">
-                <span>🔥</span>
-                <span>도전 {post.challenge_count}</span>
-              </button>
+            <div className="flex items-center justify-between pt-2 border-t border-orange-50">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
+                  <span>👍</span>
+                  <span>인정 {post.acknowledge_count}</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-sm text-orange-600 font-medium">
+                  <span>🔥</span>
+                  <span>도전 {post.challenge_count}</span>
+                </span>
+              </div>
             </div>
           </CardContent>
-        </Card>
-      </Link>
+        </Link>
+        <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+          <BookmarkButton postId={post.id} size="sm" />
+        </div>
+      </Card>
     </motion.div>
   );
 }
