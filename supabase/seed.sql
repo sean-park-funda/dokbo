@@ -1,0 +1,24 @@
+-- ============================================
+-- 독보적 (Dokbo) - Seed Data
+-- Run this after creating a user via the app
+-- ============================================
+
+-- Note: These inserts require a valid author_id from the profiles table.
+-- Use the seed button in the app UI instead, or replace the UUID below
+-- with a real user ID after signing up.
+
+-- Example seed data (for reference):
+--
+-- INSERT INTO public.posts (author_id, restaurant_name, menu_item, location, category, claim) VALUES
+-- ('YOUR_USER_UUID', '을지OB베어', '노가리 + 맥주', '을지로3가역', '술집',
+--  '40년 넘게 같은 자리. 노가리 골목의 원조. 비릿한 노가리에 시원한 생맥주 조합은 을지로 특유의 허름한 분위기와 만나야 완성된다.'),
+-- ('YOUR_USER_UUID', '마포 양미옥', '양곰탕', '마포구 도화동', '한식',
+--  '50년 전통의 양곰탕. 뽀얀 국물에 양과 수육이 듬뿍. 새벽부터 끓인 사골 육수의 깊은 맛은 어떤 곰탕집도 따라올 수 없다.'),
+-- ('YOUR_USER_UUID', '신당동 떡볶이 골목 마복림할머니', '떡볶이', '신당역', '분식',
+--  '원조 즉석떡볶이의 시작점. 간장 베이스의 궁중떡볶이 스타일인데, 라면사리와 만두를 같이 끓이면 프랜차이즈 떡볶이와 차원이 다르다.'),
+-- ('YOUR_USER_UUID', '평양면옥', '물냉면', '중구 장충동', '한식',
+--  '메밀 향 가득한 면발과 깊으면서도 담백한 육수. 살얼음이 살짝 낀 육수를 한 모금 마시면 감탄이 나온다.'),
+-- ('YOUR_USER_UUID', '봉피양', '갈비찜', '강남구 역삼동', '한식',
+--  '갈비찜의 정석. 양념이 고기 속까지 깊이 배어 있고, 매콤달콤한 양념장은 밥 한 그릇을 순식간에 비우게 만든다.'),
+-- ('YOUR_USER_UUID', '황소곱창', '소곱창 구이', '마포구 합정동', '고기',
+--  '불판 위에서 기름이 터지면서 익어가는 소곱창. 들기름 소금장에 찍어 먹으면 고소함이 입안 가득.');
